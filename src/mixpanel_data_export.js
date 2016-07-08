@@ -1,5 +1,5 @@
-var md5 = require("blueimp-md5").md5;
 var Q = require("q");
+var btoa = require('btoa');
 var _ = {
   extend: require('amp-extend'),
 };
@@ -13,10 +13,9 @@ var MixpanelExport = (function() {
 
   function MixpanelExport(opts) {
     this.opts = opts;
-    if (!(this.opts.api_key && this.opts.api_secret)) {
-      throw "Error: api_key and api_secret must be passed to MixpanelExport constructor.";
+    if (!this.opts.api_secret) {
+      throw "Error: api_secret must be passed to MixpanelExport constructor.";
     }
-    this.api_key = this.opts.api_key;
     this.api_secret = this.opts.api_secret;
     this.timeout_after = this.opts.timeout_after || 10;
     this.isNode = (typeof window !== 'object');
@@ -141,6 +140,7 @@ var MixpanelExport = (function() {
     var xmlHttpRequest = new XMLHttpRequest;
 
     xmlHttpRequest.open("get", this._buildRequestURL(method, parameters), true);
+    xmlHttpRequest.setRequestHeader('Authorization', 'Basic ' + btoa(this.api_secret + ':'));
     xmlHttpRequest.onload = function() {
       callback(self._parseResponse(method, parameters, this.responseText));
     };
@@ -177,16 +177,9 @@ var MixpanelExport = (function() {
   };
 
   MixpanelExport.prototype._requestParameterString = function(args) {
-    var connection_params = _.extend({
-      api_key: this.api_key,
-      expire: this._expireAt()
-    }, args);
+    var connection_params = _.extend({}, args);
     var keys = Object.keys(connection_params).sort();
-    var sig_keys = keys.filter(function(key) {
-      return key !== "callback"
-    });
-
-    return this._getParameterString(keys, connection_params) + "&sig=" + this._getSignature(sig_keys, connection_params);
+    return this._getParameterString(keys, connection_params);
   };
 
   MixpanelExport.prototype._getParameterString = function(keys, connection_params) {
@@ -195,16 +188,6 @@ var MixpanelExport = (function() {
     return keys.map(function(key) {
       return "" + key + "=" + (self._urlEncode(connection_params[key]));
     }).join("&");
-  };
-
-  MixpanelExport.prototype._getSignature = function(keys, connection_params) {
-    var self = this;
-
-    var sig = keys.map(function(key) {
-      return "" + key + "=" + (self._stringifyIfArray(connection_params[key]));
-    }).join("") + this.api_secret;
-
-    return md5(sig);
   };
 
   MixpanelExport.prototype._urlEncode = function(param) {

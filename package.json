@@ -11,7 +11,7 @@
   ],
   "dependencies": {
     "amp-extend": "^1.0.1",
-    "blueimp-md5": "^1.1.0",
+    "btoa": "^1.1.2",
     "q": "^1.1.2",
     "request": "^2.53.0",
     "xmlhttprequest": ">=1.5.0"

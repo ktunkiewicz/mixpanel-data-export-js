@@ -61,7 +61,6 @@ An example usage might be:
 
 ```javascript
 panel = new MixpanelExport({
-  api_key: "my_api_key",
   api_secret: "my_api_secret"
 });
 

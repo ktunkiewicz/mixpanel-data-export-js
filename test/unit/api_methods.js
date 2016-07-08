@@ -2,7 +2,6 @@ var MixpanelExport = require('../../src/mixpanel_data_export');
 var assert = require("assert");
 
 var panel = new MixpanelExport({
-  api_key: "test_key",
   api_secret: "test_secret"
 });
 
@@ -98,34 +97,6 @@ describe('API Methods', function(){
   });
 });
 
-describe('_getSignature', function() {
-  var sig;
-  var sig2;
-
-  beforeEach(function() {
-    sig = panel._getSignature(['test1','test2','test3'], {
-      test1: "test_value_1",
-      test2: "test_value_2",
-    });
-
-    sig2 = panel._getSignature(['test1','test2','test3'], {
-      test1: "test_value_1",
-      test2: "test_value_changed_2",
-    });
-  });
-
-  it('returns a different encoded string for different parameters', function() {
-    assert.ok(sig.length);
-    assert.ok(sig2.length);
-    assert.notEqual(sig, sig2);
-  });
-
-  it('returns a valid md5', function() {
-    assert.ok(sig.match(/^[0-9a-f]{32}$/i).length);
-    assert.ok(sig2.match(/^[0-9a-f]{32}$/i).length);
-  });
-});
-
 describe('_urlEncode', function() {
   it('JSON encodes and then URI encodes an array', function(){
     var result = panel._urlEncode(['test1','test2','test3']);
@@ -174,17 +145,5 @@ describe('_requestParameterString', function() {
       parameter: ['one', 'two', 'three', 'four'],
       string: "last parameter"
     });
-  });
-
-  it('includes an api_key parameter', function() {
-    assert.ok(result.match(/^api_key=.*$/i));
-  });
-
-  it('includes an expire parameter', function() {
-    assert.ok(result.match(/^.*&expire=.*$/i));
-  });
-
-  it('includes a sig parameter', function() {
-    assert.ok(result.match(/^.*&sig=.*$/i));
   });
 });
